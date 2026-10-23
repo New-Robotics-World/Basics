@@ -39,3 +39,23 @@
   - `flutter analyze` -> No issues found (0 warnings, 0 errors).
   - `flutter test` -> 5 of 5 tests passed.
 - **Next Recommended Task**: Phase 3 — Decoupling UI from data access via Repository Pattern (Dependency Inversion).
+
+### Milestone 3: Model & Data Layer (Phase 3)
+- **Status**: Completed
+- **Concepts Introduced**:
+  - The Repository Pattern & Separation of Concerns.
+  - Dependency Inversion Principle (DIP) with `abstract interface class TaskRepository`.
+  - Concrete implementation `InMemoryTaskRepository` with unmodifiable collections.
+  - Constructor-based Dependency Injection into `TaskListScreen`.
+  - Lifecycle safeguards (`if (mounted)`) across asynchronous boundaries.
+  - Runtime polymorphism / dynamic dispatch in Dart.
+- **Features Implemented**:
+  - Abstract repository interface ([task_repository.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/features/tasks/domain/task_repository.dart)).
+  - Concrete in-memory repository ([in_memory_task_repository.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/features/tasks/data/in_memory_task_repository.dart)).
+  - Refactored `TaskListScreen` to consume `TaskRepository` asynchronously with loading indicator.
+- **Tests Added**:
+  - Repository unit tests: [in_memory_task_repository_test.dart](file:///d:/kannan/projects/my%20practice/Basics/test/features/tasks/data/in_memory_task_repository_test.dart) (6 tests: get, find, add, update, delete).
+- **Commands & Checks Performed**:
+  - `flutter test` -> 11 of 11 tests passed across unit and widget suites.
+- **Next Recommended Task**: Phase 4 — Architecture Comparison Lab (Understanding state management limitations & evolution: setState vs. ChangeNotifier/Provider vs. Riverpod vs. Bloc).
+

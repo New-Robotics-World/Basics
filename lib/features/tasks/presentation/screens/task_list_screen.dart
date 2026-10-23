@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:taskflow/features/tasks/data/in_memory_task_repository.dart';
 import 'package:taskflow/features/tasks/domain/task.dart';
+import 'package:taskflow/features/tasks/domain/task_repository.dart';
 import 'package:taskflow/features/tasks/presentation/widgets/task_form_dialog.dart';
 import 'package:taskflow/features/tasks/presentation/widgets/task_item_tile.dart';
 
@@ -8,41 +10,45 @@ enum TaskFilter { all, active, completed }
 
 /// Main Screen for viewing and managing tasks.
 ///
-/// Phase 2 Architecture:
-/// - State Ownership: Managed directly via `setState` in this coordinator widget.
-/// - Data: Stored locally in a private list `_tasks`.
-/// - Children: Child widgets receive immutable data and invoke callbacks to trigger mutations.
+/// Phase 3 Architecture:
+/// - Repository Pattern: Interacts with an abstract [TaskRepository].
+/// - Dependency Injection: Accepts a repository via constructor for easy testing.
+/// - Presentation layer does not know how or where tasks are persisted.
 class TaskListScreen extends StatefulWidget {
-  const TaskListScreen({super.key});
+  const TaskListScreen({super.key, this.repository});
+
+  /// The repository instance supplying tasks.
+  final TaskRepository? repository;
 
   @override
   State<TaskListScreen> createState() => _TaskListScreenState();
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  // In Phase 2, state lives directly in the StatefulWidget.
-  // In Phase 3 & 4, we will extract this into Repositories and ViewModels/StateNotifiers!
-  final List<Task> _tasks = [
-    Task(
-      id: '1',
-      title: 'Explore Flutter Project Architecture',
-      description:
-          'Understand Layer-first vs Feature-first and build clean domain models.',
-      priority: TaskPriority.high,
-      dueDate: DateTime.now().add(const Duration(days: 1)),
-    ),
-    Task(
-      id: '2',
-      title: 'Practice Immutable State in Dart',
-      description:
-          'Master copyWith, == operator, and unmodifiable collections.',
-      priority: TaskPriority.medium,
-      isCompleted: true,
-    ),
-  ];
+  late final TaskRepository _repository;
+  List<Task> _tasks = [];
+  bool _isLoading = true;
 
   TaskFilter _activeFilter = TaskFilter.all;
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _repository = widget.repository ?? InMemoryTaskRepository();
+    _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    setState(() => _isLoading = true);
+    final tasks = await _repository.getTasks();
+    if (mounted) {
+      setState(() {
+        _tasks = tasks;
+        _isLoading = false;
+      });
+    }
+  }
 
   List<Task> get _filteredTasks {
     return _tasks.where((task) {
@@ -63,34 +69,33 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }).toList();
   }
 
-  void _toggleTask(String id, bool isCompleted) {
-    setState(() {
-      final index = _tasks.indexWhere((t) => t.id == id);
-      if (index != -1) {
-        _tasks[index] = _tasks[index].copyWith(isCompleted: isCompleted);
-      }
-    });
+  Future<void> _toggleTask(String id, bool isCompleted) async {
+    final index = _tasks.indexWhere((t) => t.id == id);
+    if (index == -1) return;
+
+    final updatedTask = _tasks[index].copyWith(isCompleted: isCompleted);
+    await _repository.updateTask(updatedTask);
+    await _loadTasks();
   }
 
-  void _deleteTask(String id) {
+  Future<void> _deleteTask(String id) async {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index == -1) return;
 
     final removedTask = _tasks[index];
-    setState(() {
-      _tasks.removeAt(index);
-    });
+    await _repository.deleteTask(id);
+    await _loadTasks();
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Deleted "${removedTask.title}"'),
         action: SnackBarAction(
           label: 'Undo',
-          onPressed: () {
-            setState(() {
-              _tasks.insert(index, removedTask);
-            });
+          onPressed: () async {
+            await _repository.addTask(removedTask);
+            await _loadTasks();
           },
         ),
       ),
@@ -104,9 +109,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
 
     if (newTask != null) {
-      setState(() {
-        _tasks.insert(0, newTask);
-      });
+      await _repository.addTask(newTask);
+      await _loadTasks();
     }
   }
 
@@ -188,7 +192,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         ),
       ),
-      body: displayedTasks.isEmpty
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : displayedTasks.isEmpty
           ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

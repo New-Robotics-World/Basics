@@ -17,12 +17,12 @@ Welcome to **TaskFlow** — learning real-world, production-quality Flutter arch
   - Verify Flutter/Dart environment.
   - Establish foundational documentation (`learning-roadmap.md`, `architecture-decisions.md`, `learning-progress.md`).
   - Define core task domain and initial project structure.
-- [ ] **Phase 2: Task List UI & Local State (Clean Simplicity)**
+- [x] **Phase 2: Task List UI & Local State (Clean Simplicity)**
   - Task model (immutable).
   - Task list screen, task item widget, task form/dialog.
   - State ownership with `setState` (understand direct callbacks and UI composition).
   - Validation, empty states, and completion toggling.
-- [ ] **Phase 3: Model & Data Layer (Decoupling UI from Data)**
+- [x] **Phase 3: Model & Data Layer (Decoupling UI from Data)**
   - Differentiate Entities vs. Models.
   - Abstract `TaskRepository` interface (Dependency Inversion).
   - In-memory repository implementation.
