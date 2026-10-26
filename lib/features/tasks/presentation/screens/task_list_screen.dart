@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:taskflow/features/tasks/data/in_memory_task_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taskflow/features/tasks/domain/task.dart';
-import 'package:taskflow/features/tasks/domain/task_repository.dart';
+import 'package:taskflow/features/tasks/presentation/providers/task_providers.dart';
 import 'package:taskflow/features/tasks/presentation/widgets/task_form_dialog.dart';
 import 'package:taskflow/features/tasks/presentation/widgets/task_item_tile.dart';
 
@@ -10,117 +10,54 @@ enum TaskFilter { all, active, completed }
 
 /// Main Screen for viewing and managing tasks.
 ///
-/// Phase 3 Architecture:
-/// - Repository Pattern: Interacts with an abstract [TaskRepository].
-/// - Dependency Injection: Accepts a repository via constructor for easy testing.
-/// - Presentation layer does not know how or where tasks are persisted.
-class TaskListScreen extends StatefulWidget {
-  const TaskListScreen({super.key, this.repository});
+/// Phase 5 Architecture:
+/// - Primary Architecture: Feature-First + Riverpod + Repository Pattern.
+/// - The UI is a pure [ConsumerWidget]; it owns ZERO business logic or storage state.
+/// - It reactively observes Riverpod providers using [WidgetRef].
+class TaskListScreen extends ConsumerWidget {
+  const TaskListScreen({super.key});
 
-  /// The repository instance supplying tasks.
-  final TaskRepository? repository;
-
-  @override
-  State<TaskListScreen> createState() => _TaskListScreenState();
-}
-
-class _TaskListScreenState extends State<TaskListScreen> {
-  late final TaskRepository _repository;
-  List<Task> _tasks = [];
-  bool _isLoading = true;
-
-  TaskFilter _activeFilter = TaskFilter.all;
-  String _searchQuery = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _repository = widget.repository ?? InMemoryTaskRepository();
-    _loadTasks();
-  }
-
-  Future<void> _loadTasks() async {
-    setState(() => _isLoading = true);
-    final tasks = await _repository.getTasks();
-    if (mounted) {
-      setState(() {
-        _tasks = tasks;
-        _isLoading = false;
-      });
-    }
-  }
-
-  List<Task> get _filteredTasks {
-    return _tasks.where((task) {
-      // 1. Status Filter
-      final matchesFilter = switch (_activeFilter) {
-        TaskFilter.all => true,
-        TaskFilter.active => !task.isCompleted,
-        TaskFilter.completed => task.isCompleted,
-      };
-
-      // 2. Search Query Filter
-      final matchesQuery =
-          _searchQuery.isEmpty ||
-          task.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          task.description.toLowerCase().contains(_searchQuery.toLowerCase());
-
-      return matchesFilter && matchesQuery;
-    }).toList();
-  }
-
-  Future<void> _toggleTask(String id, bool isCompleted) async {
-    final index = _tasks.indexWhere((t) => t.id == id);
-    if (index == -1) return;
-
-    final updatedTask = _tasks[index].copyWith(isCompleted: isCompleted);
-    await _repository.updateTask(updatedTask);
-    await _loadTasks();
-  }
-
-  Future<void> _deleteTask(String id) async {
-    final index = _tasks.indexWhere((t) => t.id == id);
-    if (index == -1) return;
-
-    final removedTask = _tasks[index];
-    await _repository.deleteTask(id);
-    await _loadTasks();
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Deleted "${removedTask.title}"'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () async {
-            await _repository.addTask(removedTask);
-            await _loadTasks();
-          },
-        ),
-      ),
-    );
-  }
-
-  Future<void> _openAddTaskDialog() async {
+  Future<void> _openAddTaskDialog(BuildContext context, WidgetRef ref) async {
     final newTask = await showDialog<Task>(
       context: context,
       builder: (_) => const TaskFormDialog(),
     );
 
     if (newTask != null) {
-      await _repository.addTask(newTask);
-      await _loadTasks();
+      ref.read(taskListProvider.notifier).addTask(newTask);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final displayedTasks = _filteredTasks;
+  void _deleteTask(BuildContext context, WidgetRef ref, Task task) {
+    ref.read(taskListProvider.notifier).deleteTask(task.id);
 
-    final totalCount = _tasks.length;
-    final completedCount = _tasks.where((t) => t.isCompleted).length;
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Deleted "${task.title}"'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            ref.read(taskListProvider.notifier).addTask(task);
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    // 1. Reactive state consumption via Riverpod
+    final filteredTasksAsync = ref.watch(filteredTasksProvider);
+    final allTasksAsync = ref.watch(taskListProvider);
+    final activeFilter = ref.watch(taskFilterProvider);
+
+    // Calculate completed vs total metrics safely from raw task state
+    final allTasks = allTasksAsync.value ?? [];
+    final totalCount = allTasks.length;
+    final completedCount = allTasks.where((t) => t.isCompleted).length;
 
     return Scaffold(
       appBar: AppBar(
@@ -134,7 +71,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
               children: [
                 // Search Input
                 TextField(
-                  onChanged: (val) => setState(() => _searchQuery = val),
+                  onChanged: (val) {
+                    ref.read(taskSearchQueryProvider.notifier).setQuery(val);
+                  },
                   decoration: InputDecoration(
                     hintText: 'Search tasks...',
                     prefixIcon: const Icon(Icons.search),
@@ -169,11 +108,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             label: Text('Done'),
                           ),
                         ],
-                        selected: {_activeFilter},
+                        selected: {activeFilter},
                         onSelectionChanged: (newSelection) {
-                          setState(() {
-                            _activeFilter = newSelection.first;
-                          });
+                          ref
+                              .read(taskFilterProvider.notifier)
+                              .setFilter(newSelection.first);
                         },
                       ),
                     ),
@@ -192,10 +131,26 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : displayedTasks.isEmpty
-          ? Center(
+      body: filteredTasksAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+              const SizedBox(height: 12),
+              Text('Failed to load tasks: $error'),
+              const SizedBox(height: 12),
+              FilledButton.tonal(
+                onPressed: () => ref.invalidate(taskListProvider),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+        data: (displayedTasks) {
+          if (displayedTasks.isEmpty) {
+            return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -206,7 +161,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    _tasks.isEmpty
+                    allTasks.isEmpty
                         ? 'No tasks yet!'
                         : 'No tasks match your search/filter.',
                     style: theme.textTheme.titleMedium?.copyWith(
@@ -215,7 +170,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    _tasks.isEmpty
+                    allTasks.isEmpty
                         ? 'Tap the button below to add your first task.'
                         : 'Try selecting a different filter tab.',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -224,21 +179,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   ),
                 ],
               ),
-            )
-          : ListView.builder(
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(taskListProvider);
+              await ref.read(taskListProvider.future);
+            },
+            child: ListView.builder(
               padding: const EdgeInsets.only(top: 8, bottom: 80),
               itemCount: displayedTasks.length,
               itemBuilder: (context, index) {
                 final task = displayedTasks[index];
                 return TaskItemTile(
                   task: task,
-                  onToggle: (completed) => _toggleTask(task.id, completed),
-                  onDelete: () => _deleteTask(task.id),
+                  onToggle: (completed) {
+                    ref
+                        .read(taskListProvider.notifier)
+                        .toggleTask(task.id, completed);
+                  },
+                  onDelete: () => _deleteTask(context, ref, task),
                 );
               },
             ),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openAddTaskDialog,
+        onPressed: () => _openAddTaskDialog(context, ref),
         icon: const Icon(Icons.add),
         label: const Text('New Task'),
       ),

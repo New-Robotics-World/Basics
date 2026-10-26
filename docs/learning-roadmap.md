@@ -27,17 +27,17 @@ Welcome to **TaskFlow** — learning real-world, production-quality Flutter arch
   - Abstract `TaskRepository` interface (Dependency Inversion).
   - In-memory repository implementation.
   - Unit tests for repository logic without Flutter widgets.
-- [ ] **Phase 4: Architecture Comparison Lab**
+- [x] **Phase 4: Architecture Comparison Lab**
   - Layer-first vs. Feature-first deep dive.
   - MVC vs. MVVM comparison on a slice of TaskFlow.
   - State management comparison: `setState` vs. `ChangeNotifier`/`Provider` vs. `Riverpod` vs. `Bloc`/`Cubit`.
-- [ ] **Phase 5: Primary Application Architecture Implementation**
+- [x] **Phase 5: Primary Application Architecture Implementation**
   - Establish final architecture: Feature-First + Riverpod + Repository Pattern.
   - Refactor cleanly with zero regression.
-- [ ] **Phase 6: Local Persistence**
+- [x] **Phase 6: Local Persistence**
   - Compare SharedPreferences vs. SQLite (`sqflite` / `drift`) vs. Key-Value (`Hive`).
   - Implement durable persistence and offline support.
-- [ ] **Phase 7: Remote API Integration**
+- [x] **Phase 7: Remote API Integration**
   - HTTP client (`Dio`), RESTful contracts, error handling, network failure recovery.
   - Loading / Empty / Error / Success states.
 - [ ] **Phase 8: Authentication & Multi-User Task Isolation**
@@ -47,3 +47,32 @@ Welcome to **TaskFlow** — learning real-world, production-quality Flutter arch
   - Code analysis and strict linting.
 - [ ] **Phase 10: Production Readiness & Polishing**
   - Performance profiling, responsive design, logging, error boundaries, CI/CD setup.
+
+---
+
+## 🚀 Fullstack Journey: Real Backend Implementation
+*Following the completion of the Flutter mobile/web mastery, we build the real production backend to replace local mock APIs.*
+
+- [ ] **Backend Phase 1: Server Architecture & Environment Setup**
+  - Choosing backend stack (Node.js/Express, Python/FastAPI, or Dart Frog/Shelf).
+  - RESTful API design principles & HTTP status codes.
+- [ ] **Backend Phase 2: Database Modeling & Persistence**
+  - Relational database setup (PostgreSQL / SQLite).
+  - Migration schemas for Users and Tasks tables.
+- [ ] **Backend Phase 3: Authentication & Security**
+  - Password hashing (bcrypt / argon2).
+  - JWT (JSON Web Token) generation, verification, and refresh token rotation.
+- [ ] **Backend Phase 4: Full CRUD Task Endpoints**
+  - `GET /api/v1/tasks`, `POST /api/v1/tasks`, `PUT /api/v1/tasks/:id`, `DELETE /api/v1/tasks/:id`.
+  - Pagination, filtering, and search on the database level.
+- [ ] **Backend Phase 5: End-to-End Integration**
+  - Connecting TaskFlow Flutter client directly to our live backend server.
+  - Handling real multi-user sync and offline-first queue syncing.
+
+---
+
+## 🎁 Elective / Bonus Tracks
+- [ ] **Bonus Lab: GetX Fast-Track & Trade-off Analysis**
+  - The GetX all-in-one philosophy (`GetxController`, `.obs`, `Obx`).
+  - Context-less routing (`Get.to()`, `Get.snackbar()`) & Service Locator (`Get.put()`, `Get.find()`).
+  - Side-by-side trade-off analysis: When to pick GetX vs. Riverpod in production.

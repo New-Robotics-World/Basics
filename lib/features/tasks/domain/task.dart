@@ -56,6 +56,35 @@ class Task {
     );
   }
 
+  /// Converts this [Task] to a JSON-compatible map for local/remote persistence.
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'dueDate': dueDate?.toIso8601String(),
+      'priority': priority.name,
+      'isCompleted': isCompleted,
+    };
+  }
+
+  /// Recreates a [Task] instance from a JSON map.
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String? ?? '',
+      dueDate: json['dueDate'] != null
+          ? DateTime.tryParse(json['dueDate'] as String)
+          : null,
+      priority: TaskPriority.values.firstWhere(
+        (p) => p.name == json['priority'],
+        orElse: () => TaskPriority.medium,
+      ),
+      isCompleted: json['isCompleted'] as bool? ?? false,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

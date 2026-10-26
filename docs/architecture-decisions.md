@@ -19,3 +19,26 @@ We are building TaskFlow to progress from basic Flutter familiarity to productio
 ### Consequences
 - **Positive**: We will understand *why* each abstraction exists before adopting it.
 - **Trade-off**: Requires writing a clean foundational version first, then deliberately refactoring it across phases.
+
+---
+
+## ADR 002: Client-First Mocking Strategy & Live Backend Sync
+
+### Status
+Accepted
+
+### Context
+In building a fullstack system, developing the backend and frontend simultaneously without a stable contract leads to moving targets, blocking dependencies, and fragile integration. 
+
+### Decision
+1. **Frontend Readiness First**:
+   - Build client-side models, repositories (`ApiTaskRepository`), Dio HTTP client, and mock network adapters using dummy/mock data.
+   - Verify UI rendering, pull-to-refresh, error boundaries, and state resilience completely in Flutter.
+2. **Dedicated Fullstack Backend Phase**:
+   - Following the completion of the mobile/web architecture journey (Phases 1–10), construct the real backend server (database schemas, auth, endpoints).
+   - Swap the client's dummy/mock repository configuration with the live server base URL without altering presentation UI or domain models.
+
+### Consequences
+- **Positive**: Zero coupling between client progress and backend readiness. Client is 100% bug-free and tested ahead of time.
+- **Trade-off**: Requires maintaining an accurate API contract so the mock data matches the real server schema.
+

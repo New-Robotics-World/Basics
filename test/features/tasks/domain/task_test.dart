@@ -51,5 +51,26 @@ void main() {
       expect(taskA, equals(taskB));
       expect(taskA.hashCode, equals(taskB.hashCode));
     });
+
+    test('toJson and fromJson correctly serialize and deserialize Task', () {
+      final date = DateTime(2026, 10, 24, 12, 0);
+      final original = Task(
+        id: 'json-1',
+        title: 'Serialization Test',
+        description: 'Testing JSON round-trip',
+        dueDate: date,
+        priority: TaskPriority.high,
+        isCompleted: true,
+      );
+
+      final json = original.toJson();
+      final reconstructed = Task.fromJson(json);
+
+      expect(reconstructed, equals(original));
+      expect(reconstructed.id, 'json-1');
+      expect(reconstructed.priority, TaskPriority.high);
+      expect(reconstructed.isCompleted, isTrue);
+      expect(reconstructed.dueDate, equals(date));
+    });
   });
 }

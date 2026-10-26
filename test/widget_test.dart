@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:taskflow/features/tasks/data/in_memory_task_repository.dart';
 import 'package:taskflow/features/tasks/domain/task.dart';
+import 'package:taskflow/features/tasks/presentation/providers/task_providers.dart';
 import 'package:taskflow/features/tasks/presentation/widgets/task_item_tile.dart';
 import 'package:taskflow/main.dart';
 
 void main() {
   group('TaskFlow Smoke and Widget Tests', () {
-    testWidgets('App renders task list title and initial tasks', (
+    testWidgets('App renders task list title and initial tasks with Riverpod', (
       tester,
     ) async {
-      await tester.pumpWidget(const TaskFlowApp());
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            taskRepositoryProvider.overrideWithValue(InMemoryTaskRepository()),
+          ],
+          child: const TaskFlowApp(),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('TaskFlow'), findsOneWidget);
