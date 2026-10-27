@@ -9,7 +9,7 @@ import 'package:taskflow/features/tasks/domain/task_repository.dart';
 class InMemoryTaskRepository implements TaskRepository {
   /// Creates the repository with optional [initialTasks].
   InMemoryTaskRepository({List<Task>? initialTasks})
-      : _tasks = List.of(initialTasks ?? _defaultTasks);
+    : _tasks = List.of(initialTasks ?? _defaultTasks);
 
   final List<Task> _tasks;
 
@@ -22,7 +22,7 @@ class InMemoryTaskRepository implements TaskRepository {
       priority: TaskPriority.high,
       dueDate: DateTime.now().add(const Duration(days: 1)),
     ),
-    Task(
+    const Task(
       id: '2',
       title: 'Practice Immutable State in Dart',
       description:

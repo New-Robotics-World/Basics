@@ -124,6 +124,68 @@
   - `flutter test` -> 25 of 25 tests passed.
 - **Next Recommended Task**: Phase 8 — Authentication & Multi-User Task Isolation (`flutter_secure_storage` & Auth State).
 
+### Milestone 8: Authentication & Secure Hardware Vault (Phase 8)
+- **Status**: Completed
+- **Concepts Introduced**:
+  - Hardware-backed encrypted credential storage using `flutter_secure_storage: ^11.2.0` (Android Keystore / iOS Keychain).
+  - Domain modeling for authenticated user identity (`AuthUser`).
+  - Session state coordination using Riverpod `AsyncNotifier` and computed boolean flags (`isAuthenticatedProvider`).
+  - Automatic request authorization using Dio's `AuthInterceptor` (`Authorization: Bearer <token>`).
+- **Features Implemented**:
+  - `AuthUser` domain model ([auth_user.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/features/auth/domain/auth_user.dart)).
+  - Abstract `AuthRepository` interface ([auth_repository.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/features/auth/domain/auth_repository.dart)).
+  - `SecureAuthRepository` implementation using `FlutterSecureStorage` ([secure_auth_repository.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/features/auth/data/secure_auth_repository.dart)).
+  - Riverpod auth state providers ([auth_providers.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/features/auth/presentation/providers/auth_providers.dart)).
+  - Dio `AuthInterceptor` ([auth_interceptor.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/features/auth/data/auth_interceptor.dart)).
+- **Tests Added**:
+  - `test/features/auth/auth_test.dart` (3 tests covering entity serialization, state transitions on login/logout, and Dio bearer header attachment).
+- **Commands & Checks Performed**:
+  - `flutter test` -> 28 of 28 tests passed.
+- **Next Recommended Task**: Phase 9 — Comprehensive Testing & Quality (Golden tests, code analysis, strict linting, and coverage).
+
+### Milestone 9: Comprehensive Testing & Static Analysis (Phase 9)
+- **Status**: Completed
+- **Concepts Introduced**:
+  - The Flutter Testing Pyramid (Unit -> Widget -> Integration -> Static Analysis).
+  - Production Strict Analysis in `analysis_options.yaml` (`strict-casts`, `strict-inference`, `strict-raw-types`).
+  - Lint enforcement: `unawaited_futures`, `prefer_const_constructors`, `prefer_final_locals`.
+  - Simulating complex user interactions in Widget tests (`enterText`, `tap`, validation feedback).
+  - Integration widget testing of Riverpod-driven UI components.
+- **Features Implemented**:
+  - Upgraded `analysis_options.yaml` with strict production linting.
+  - Resolved all unawaited futures and added performance-preserving `const` constructors across the app.
+  - Dialog validation & submission tests ([task_form_dialog_test.dart](file:///d:/kannan/projects/my%20practice/Basics/test/features/tasks/presentation/widgets/task_form_dialog_test.dart)).
+  - Reactive search and filter integration tests ([task_list_screen_test.dart](file:///d:/kannan/projects/my%20practice/Basics/test/features/tasks/presentation/screens/task_list_screen_test.dart)).
+- **Tests Added**:
+  - 5 new widget & integration tests (total test count increased from 28 to 33).
+- **Commands & Checks Performed**:
+  - `flutter analyze` -> Clean (0 warnings, 0 errors in 1.3s).
+  - `flutter test` -> 33 of 33 tests passed across all 7 test files.
+- **Next Recommended Task**: Phase 10 — Production Readiness & Polishing (Release build verification, app icon/manifest, performance profiling).
+
+### Milestone 10: Production Readiness, Error Boundaries & CI/CD (Phase 10)
+- **Status**: Completed
+- **Concepts Introduced**:
+  - Global error boundaries and intercepting rendering crashes with `ErrorWidget.builder`.
+  - Platform crash logging with `FlutterError.onError` and `PlatformDispatcher.instance.onError`.
+  - Production formatting and style hygiene (`dart format`).
+  - Automated CI/CD (Continuous Integration & Continuous Deployment) architecture using GitHub Actions (`.github/workflows/ci_cd.yml`).
+  - Dual-job pipeline design: Job 1 (Linting, static analysis, 34 automated tests) -> Job 2 (Release web bundle build & automated GitHub Pages deployment).
+- **Features Implemented**:
+  - `AppErrorBoundary` widget with clean recovery UI and reboot mechanism ([app_error_boundary.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/core/widgets/app_error_boundary.dart)).
+  - Global error interceptors configured in [main.dart](file:///d:/kannan/projects/my%20practice/Basics/lib/main.dart).
+  - Complete CI/CD workflow created ([ci_cd.yml](file:///d:/kannan/projects/my%20practice/Basics/.github/workflows/ci_cd.yml)).
+- **Tests Added**:
+  - Error boundary widget tests ([app_error_boundary_test.dart](file:///d:/kannan/projects/my%20practice/Basics/test/core/widgets/app_error_boundary_test.dart)).
+- **Commands & Checks Performed**:
+  - `dart format .` -> 100% formatted.
+  - `flutter analyze` -> Clean (0 issues found).
+  - `flutter test` -> 34 of 34 tests passed.
+- **Next Recommended Task**: Fullstack Journey: Real Backend Implementation (Backend Phase 1: Server Architecture & Environment Setup).
+
+
+
+
 
 
 

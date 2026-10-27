@@ -1,0 +1,76 @@
+name: TaskFlow CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+# Cancel in-progress runs if a newer commit is pushed to the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================
+  # 1. Continuous Integration (CI) Quality Gate
+  # ==========================================
+  quality-check:
+    name: Lint & Automated Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Verify Code Formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Run Strict Static Analysis
+        run: flutter analyze
+
+      - name: Run Automated Test Suite (All 34 Tests)
+        run: flutter test --coverage
+
+  # ==========================================
+  # 2. Continuous Deployment (CD) Release
+  # ==========================================
+  deploy-web:
+    name: Build & Deploy to GitHub Pages
+    needs: quality-check # Only runs if CI passes completely!
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Needed to publish to gh-pages branch
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Web Production Bundle
+        run: flutter build web --release
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web

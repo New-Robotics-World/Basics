@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taskflow/features/tasks/domain/task.dart';
@@ -24,12 +25,12 @@ class TaskListScreen extends ConsumerWidget {
     );
 
     if (newTask != null) {
-      ref.read(taskListProvider.notifier).addTask(newTask);
+      await ref.read(taskListProvider.notifier).addTask(newTask);
     }
   }
 
   void _deleteTask(BuildContext context, WidgetRef ref, Task task) {
-    ref.read(taskListProvider.notifier).deleteTask(task.id);
+    unawaited(ref.read(taskListProvider.notifier).deleteTask(task.id));
 
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -38,7 +39,7 @@ class TaskListScreen extends ConsumerWidget {
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () {
-            ref.read(taskListProvider.notifier).addTask(task);
+            unawaited(ref.read(taskListProvider.notifier).addTask(task));
           },
         ),
       ),
@@ -137,7 +138,11 @@ class TaskListScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: theme.colorScheme.error,
+              ),
               const SizedBox(height: 12),
               Text('Failed to load tasks: $error'),
               const SizedBox(height: 12),

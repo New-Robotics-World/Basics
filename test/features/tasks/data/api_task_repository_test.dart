@@ -47,7 +47,7 @@ void main() {
             'description': 'From Backend',
             'priority': 'high',
             'isCompleted': false,
-          }
+          },
         ]);
 
         return ResponseBody.fromString(
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('addTask sends POST request with task JSON', () async {
-      final task = Task(
+      const task = Task(
         id: 'new-api',
         title: 'New Cloud Task',
         priority: TaskPriority.low,
@@ -87,10 +87,7 @@ void main() {
 
     test('getTaskById returns null on 404 response', () async {
       adapter.handler = (options) {
-        return ResponseBody.fromString(
-          '{"message": "Not Found"}',
-          404,
-        );
+        return ResponseBody.fromString('{"message": "Not Found"}', 404);
       };
 
       final result = await repository.getTaskById('unknown-id');
@@ -105,10 +102,7 @@ void main() {
         );
       };
 
-      expect(
-        () => repository.getTasks(),
-        throwsA(isA<ApiException>()),
-      );
+      expect(() => repository.getTasks(), throwsA(isA<ApiException>()));
     });
   });
 }

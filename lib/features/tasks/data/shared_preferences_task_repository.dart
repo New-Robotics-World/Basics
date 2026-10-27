@@ -21,7 +21,7 @@ class SharedPreferencesTaskRepository implements TaskRepository {
       priority: TaskPriority.high,
       dueDate: DateTime.now().add(const Duration(days: 1)),
     ),
-    Task(
+    const Task(
       id: '2',
       title: 'Practice Immutable State in Dart',
       description:
@@ -41,7 +41,9 @@ class SharedPreferencesTaskRepository implements TaskRepository {
 
     try {
       final tasks = rawList
-          .map((item) => Task.fromJson(jsonDecode(item) as Map<String, dynamic>))
+          .map(
+            (item) => Task.fromJson(jsonDecode(item) as Map<String, dynamic>),
+          )
           .toList();
       return List.unmodifiable(tasks);
     } catch (_) {

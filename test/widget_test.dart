@@ -34,7 +34,7 @@ void main() {
       bool toggled = false;
       bool deleted = false;
 
-      final task = Task(
+      const task = Task(
         id: '99',
         title: 'Review PR',
         priority: TaskPriority.high,

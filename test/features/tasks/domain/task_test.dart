@@ -15,7 +15,7 @@ void main() {
     });
 
     test('copyWith updates specified fields while keeping original values', () {
-      final task = Task(
+      const task = Task(
         id: '1',
         title: 'Initial Title',
         priority: TaskPriority.low,

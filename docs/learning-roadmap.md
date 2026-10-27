@@ -40,12 +40,12 @@ Welcome to **TaskFlow** — learning real-world, production-quality Flutter arch
 - [x] **Phase 7: Remote API Integration**
   - HTTP client (`Dio`), RESTful contracts, error handling, network failure recovery.
   - Loading / Empty / Error / Success states.
-- [ ] **Phase 8: Authentication & Multi-User Task Isolation**
+- [x] **Phase 8: Authentication & Multi-User Task Isolation**
   - Auth token storage, session expiration, login/logout flow.
-- [ ] **Phase 9: Comprehensive Testing & Quality**
+- [x] **Phase 9: Comprehensive Testing & Quality**
   - Unit tests, Widget tests, Integration tests.
   - Code analysis and strict linting.
-- [ ] **Phase 10: Production Readiness & Polishing**
+- [x] **Phase 10: Production Readiness & Polishing**
   - Performance profiling, responsive design, logging, error boundaries, CI/CD setup.
 
 ---

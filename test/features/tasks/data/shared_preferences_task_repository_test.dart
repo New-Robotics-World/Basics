@@ -11,7 +11,7 @@ void main() {
     late SharedPreferences prefs;
     late SharedPreferencesTaskRepository repository;
 
-    final testTask1 = Task(
+    const testTask1 = Task(
       id: 'pref-1',
       title: 'Persisted Task 1',
       description: 'Saved on disk',
@@ -20,9 +20,7 @@ void main() {
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({
-        'taskflow_tasks_v1': [
-          jsonEncode(testTask1.toJson()),
-        ],
+        'taskflow_tasks_v1': [jsonEncode(testTask1.toJson())],
       });
       prefs = await SharedPreferences.getInstance();
       repository = SharedPreferencesTaskRepository(prefs);
@@ -38,7 +36,7 @@ void main() {
     });
 
     test('addTask persists new task to SharedPreferences', () async {
-      final newTask = Task(
+      const newTask = Task(
         id: 'pref-2',
         title: 'New Persisted Task',
         priority: TaskPriority.low,

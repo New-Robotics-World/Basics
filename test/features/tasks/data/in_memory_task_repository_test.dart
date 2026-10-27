@@ -6,14 +6,14 @@ void main() {
   group('InMemoryTaskRepository Tests', () {
     late InMemoryTaskRepository repository;
 
-    final testTask1 = Task(
+    const testTask1 = Task(
       id: 'task-1',
       title: 'First Test Task',
       description: 'Description 1',
       priority: TaskPriority.low,
     );
 
-    final testTask2 = Task(
+    const testTask2 = Task(
       id: 'task-2',
       title: 'Second Test Task',
       description: 'Description 2',
@@ -22,9 +22,7 @@ void main() {
     );
 
     setUp(() {
-      repository = InMemoryTaskRepository(
-        initialTasks: [testTask1, testTask2],
-      );
+      repository = InMemoryTaskRepository(initialTasks: [testTask1, testTask2]);
     });
 
     test('getTasks returns all initial tasks', () async {
@@ -49,10 +47,7 @@ void main() {
     });
 
     test('addTask inserts task at beginning of list', () async {
-      final newTask = Task(
-        id: 'task-3',
-        title: 'New Added Task',
-      );
+      const newTask = Task(id: 'task-3', title: 'New Added Task');
 
       await repository.addTask(newTask);
       final tasks = await repository.getTasks();

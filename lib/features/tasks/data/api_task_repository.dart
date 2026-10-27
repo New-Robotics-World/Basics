@@ -47,8 +47,9 @@ class ApiTaskRepository implements TaskRepository {
   @override
   Future<Task?> getTaskById(String id) async {
     try {
-      final response =
-          await _dio.get<Map<String, dynamic>>('$_tasksEndpoint/$id');
+      final response = await _dio.get<Map<String, dynamic>>(
+        '$_tasksEndpoint/$id',
+      );
       if (response.data == null) return null;
       return Task.fromJson(response.data!);
     } on DioException catch (e) {
@@ -60,10 +61,7 @@ class ApiTaskRepository implements TaskRepository {
   @override
   Future<void> addTask(Task task) async {
     try {
-      await _dio.post<dynamic>(
-        _tasksEndpoint,
-        data: task.toJson(),
-      );
+      await _dio.post<dynamic>(_tasksEndpoint, data: task.toJson());
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -96,13 +94,24 @@ class ApiTaskRepository implements TaskRepository {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return ApiException('Connection timed out. Check your network.', statusCode: status);
+        return ApiException(
+          'Connection timed out. Check your network.',
+          statusCode: status,
+        );
       case DioExceptionType.badResponse:
-        return ApiException('Server returned error: ${e.response?.statusMessage ?? "Unknown"}', statusCode: status);
+        return ApiException(
+          'Server returned error: ${e.response?.statusMessage ?? "Unknown"}',
+          statusCode: status,
+        );
       case DioExceptionType.connectionError:
-        return const ApiException('No internet connection. Please verify your network.');
+        return const ApiException(
+          'No internet connection. Please verify your network.',
+        );
       default:
-        return ApiException(e.message ?? 'An unexpected network error occurred.', statusCode: status);
+        return ApiException(
+          e.message ?? 'An unexpected network error occurred.',
+          statusCode: status,
+        );
     }
   }
 }

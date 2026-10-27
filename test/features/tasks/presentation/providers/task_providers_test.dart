@@ -10,7 +10,7 @@ void main() {
     late ProviderContainer container;
     late InMemoryTaskRepository mockRepository;
 
-    final initialTask = Task(
+    const initialTask = Task(
       id: 'task-100',
       title: 'Initial Riverpod Task',
       priority: TaskPriority.high,
@@ -23,9 +23,7 @@ void main() {
       // In Riverpod, ProviderContainer lets us test state in pure Dart!
       // Notice how easily we override taskRepositoryProvider:
       container = ProviderContainer(
-        overrides: [
-          taskRepositoryProvider.overrideWithValue(mockRepository),
-        ],
+        overrides: [taskRepositoryProvider.overrideWithValue(mockRepository)],
       );
     });
 
@@ -42,7 +40,7 @@ void main() {
     });
 
     test('addTask updates state via taskListProvider', () async {
-      final newTask = Task(
+      const newTask = Task(
         id: 'task-101',
         title: 'New Added Task',
         priority: TaskPriority.low,
@@ -73,7 +71,7 @@ void main() {
 
     test('filteredTasksProvider filters by active status', () async {
       // Add completed task
-      final completedTask = Task(
+      const completedTask = Task(
         id: 'task-102',
         title: 'Completed Task',
         isCompleted: true,
@@ -81,9 +79,7 @@ void main() {
       await container.read(taskListProvider.notifier).addTask(completedTask);
 
       // Set filter to active
-      container
-          .read(taskFilterProvider.notifier)
-          .setFilter(TaskFilter.active);
+      container.read(taskFilterProvider.notifier).setFilter(TaskFilter.active);
 
       final filtered = container.read(filteredTasksProvider).value ?? [];
       expect(filtered.length, 1);
